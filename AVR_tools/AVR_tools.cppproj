@@ -171,10 +171,10 @@
     <CleanTarget>clean</CleanTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="crc.cpp">
+    <Compile Include="DS18B20.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="crc.h">
+    <Compile Include="DS18B20.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">

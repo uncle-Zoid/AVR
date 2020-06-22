@@ -7,14 +7,19 @@
 
 #include <avr/io.h>
 #include "Owi.h"
+#include "DS18B20.h"
+
 
 int main(void)
 {
 	AvrPort owiPort{&DDRA, &PINA, &PORTA};
+	
+	byte_t config[3];
 		
-	Owi owi(owiPort, 0);
+	DS18B20 sensor(owiPort, 0);
+	sensor.writeConfigRegister(config, false);
 
-	owi.reset();
+	
     /* Replace with your application code */
     while (1) 
     {

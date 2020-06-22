@@ -13,12 +13,14 @@
 #endif
 
 
-#include <inttypes.h>
 
-#define setbit (port, bit) (port |= (1<<bit));
-#define resbit (port, bit) (port &= ~(1<<bit));
+#define resbit(port, bit)  (port &= ~(1<<bit));
+#define setbit(port, bit)  (port |= (1<<bit));
 #define testbit(port, bit) (port & (1<<bit))
 
+
+
+#include <inttypes.h>
 
 using byte_t = uint8_t;
 
@@ -56,9 +58,6 @@ private:
 	
 	AvrPort port_;
 	uint8_t pin_;
-	
-	byte_t rom[8];
-
 
 //functions
 public:
@@ -70,18 +69,17 @@ public:
 	*/
 	byte_t	reset		();	
 	void	writeByte	(byte_t byte);
+	void	writeBit	(byte_t bit);
 	byte_t	readByte	();
-	byte_t*	readROM		();
+	byte_t	readBit		();
+	void	readROM		(byte_t *rom, byte_t size);
 	void	skipRom		();	
 	void	matchROM	(byte_t *ROM_64bit);
 	
 protected:
 private:
 	Owi( const Owi &c );
-	Owi& operator=( const Owi &c );
-
-	byte_t readBit ();
-	void writeBit (byte_t bit);
+	Owi& operator=( const Owi &c );		
 }; //Owi
 
 #endif //__OWI_H__
