@@ -9,7 +9,7 @@
 #define __OWI_H__
 
 #ifndef F_PCU
-#define F_CPU 16000000
+#define F_CPU 16000000UL
 #endif
 
 

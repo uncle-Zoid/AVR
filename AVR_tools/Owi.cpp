@@ -34,7 +34,7 @@ byte_t Owi::reset()
 	
 	resbit (*port_.ddr, pin_); // nastavit pin jako vstupni
 	
-	byte_t presence = 0;//!testbit (*port_.pin, pin_); // precti hodnotu
+	byte_t presence = !testbit (*port_.pin, pin_); // precti hodnotu
 	_delay_us (J);
 	
 	sei();
@@ -103,6 +103,7 @@ byte_t Owi::readByte()
 		result >>= 1;
 		result |= 0x80 * readBit();
 	}
+	return result;
 }
 
 void Owi::readROM(byte_t *rom, byte_t size)

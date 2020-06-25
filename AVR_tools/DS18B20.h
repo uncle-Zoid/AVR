@@ -57,7 +57,7 @@ private:
 	byte_t scratchpad_[SCRATCHPAD_SIZE];
 	byte_t rom_ [ROM_SIZE];
 	PowerSupply power_;
-	uint32_t delay_;
+
 
 //functions
 public:
@@ -94,6 +94,10 @@ public:
 	// teplota je ulozena s presnosti na dve desetinna mista 2550 = 25,5 °C
 	int temperature();
 	
+	
+	byte_t*		scratchpad	()  { return scratchpad_; }
+	byte_t*		rom			()  { return rom_; };
+	PowerSupply power		()  { return power_; };
 	
 protected:
 private:
