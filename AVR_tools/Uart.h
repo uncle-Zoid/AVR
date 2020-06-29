@@ -26,6 +26,27 @@
 
 using byte_t = uint8_t;
 
+struct Packet
+{
+	static constexpr byte_t MaxSize = 32;
+	Packet ()
+		: size (-1)
+	{};
+		
+	bool isValid () const
+	{
+		return size > -(1);
+	}
+	
+	byte_t maxSize()
+	{
+		return MaxSize;
+	}
+	
+	byte_t data[MaxSize];
+	int size;
+};
+
 class Uart
 {
 //variables
@@ -37,6 +58,9 @@ public:
 			UART_DATA_OVERRUN	 = 0x04,			
 			UART_FRAME_ERROR	 = 0x08
 		};
+		
+	static constexpr byte_t HEAD = 0x1A;
+	
 protected:
 private:
 	// buffer musi byt mocnina dvou
@@ -50,6 +74,7 @@ private:
 	volatile byte_t tailTx_;
 	volatile byte_t error_;
 	
+	static const byte_t SERIAL_ERROR[3];
 //functions
 public:	
 	~Uart() = default;
@@ -75,10 +100,17 @@ public:
 	inline void receiveInteruptRoutine();
 	inline void transmitInteruptRoutine();
 	
-	void send(byte_t data);
-	void send(byte_t *data, int size);
-	byte_t read(UartError &err);
+	void send (byte_t data);
+	void send (const byte_t *data, int size);
+	void send (const Packet &p);
+	void sendError ();
+	
+	byte_t read (UartError &err);
+	void   read (Packet &p);
+	
 	byte_t available () const;
+	
+	void clear();
 		
 protected:
 private:

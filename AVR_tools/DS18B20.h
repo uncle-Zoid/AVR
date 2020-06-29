@@ -44,9 +44,9 @@ public:
 		};
 	
 	enum PowerSupply {		
-		ParaziticSupply = 0,
-		ExternalSupply,
-		noSensor
+		noSensor = 0,
+		ParaziticSupply,
+		ExternalSupply		
 		};
 	static constexpr uint32_t CONVERSION_WAIT_US[4] = {750000, 375000, 187500, 93750};
 	static constexpr byte_t SCRATCHPAD_SIZE = 9; 

@@ -9,7 +9,8 @@
 
 #include "Uart.h"
 
-
+const byte_t Uart::SERIAL_ERROR[3] = {HEAD, 3, 0xFE};
+	
 ISR (USART_RXC_vect)
 {
 	Uart::instance().receiveInteruptRoutine();
@@ -57,44 +58,6 @@ void Uart::transmitInteruptRoutine()
 	sei();
 }
 
-void Uart::send(byte_t data)
-{
-	byte_t head  = (headTx_ + 1) & BUFFER_MASK;
-	
-	while (head == tailTx_); // cekej na vyprazdneni bufferu
-	
-	bufferTx_[head] = data;
-	headTx_ = head;
-
-	// povol preruseni pro odeslani dat
-	UCSRB |= (1 << UDRIE);
-}
-
-void Uart::send(byte_t *data, int size)
-{
-	for (int i = 0; i < size; ++i)
-	{
-		send(data[i]);
-	}
-}
-
-byte_t Uart::read(UartError &err)
-{
-	if (headRx_ == tailRx_)
-	{
-		err = UART_NO_DATA;
-		return 0x00;
-	}
-	tailRx_ = (tailRx_ + 1) & BUFFER_MASK;
-	err = UartError(error_);
-	return bufferRx_ [tailRx_];
-}
-
-byte_t Uart::available() const
-{
-	return (BUFFER_MASK + headRx_ - tailRx_) % BUFFER_MASK;
-}
-
 void Uart::init(uint16_t uartBaudrate)
 {
 	headRx_ = 0;
@@ -114,4 +77,97 @@ void Uart::init(uint16_t uartBaudrate)
 	UCSRB = (1 << RXCIE) | (1 << RXEN) | (1 << TXEN);
 	// asynchronni prenos, bez parity, 1 stopbit, 8 datovych bitu
 	UCSRC = (1 << URSEL) | (1 << UCSZ0) | (1 << UCSZ1);
+}
+
+void Uart::clear()
+{
+	headRx_ = 0;
+	tailRx_ = 0;
+	headTx_ = 0;
+	tailTx_ = 0;
+	error_ = UART_NO_ERROR;
+}
+
+byte_t Uart::available() const
+{
+	return (BUFFER_MASK + headRx_ - tailRx_) % BUFFER_MASK;
+}
+
+void Uart::send(byte_t data)
+{
+	byte_t head  = (headTx_ + 1) & BUFFER_MASK;
+	
+	while (head == tailTx_); // cekej na vyprazdneni bufferu
+	
+	bufferTx_[head] = data;
+	headTx_ = head;
+
+	// povol preruseni pro odeslani dat
+	UCSRB |= (1 << UDRIE);
+}
+
+void Uart::send (const Packet &p)
+{
+	send (p.data, p.size);
+}
+
+
+void Uart::send(const byte_t *data, int size)
+{
+	for (int i = 0; i < size; ++i)
+	{
+		send(data[i]);
+	}
+}
+
+void Uart::sendError()
+{
+	headRx_ = 0;
+	tailRx_ = 0;
+	send(SERIAL_ERROR, sizeof (SERIAL_ERROR));
+}
+
+byte_t Uart::read(UartError &err)
+{
+	if (headRx_ == tailRx_)
+	{
+		err = UART_NO_DATA;
+		return 0x00;
+	}
+	tailRx_ = (tailRx_ + 1) & BUFFER_MASK;
+	err = UartError(error_);
+	return bufferRx_ [tailRx_];
+}
+
+void Uart::read(Packet &p)
+{
+	// pridat overovani casu
+	p.size = -1;
+	byte_t availableBytes = available();
+	if (availableBytes >= 3)
+	{
+		if (bufferRx_[(tailRx_ + 1) & BUFFER_MASK] == HEAD)
+		{			
+			byte_t needBytes = bufferRx_[(tailRx_ + 2) & BUFFER_MASK];
+			if (needBytes > p.maxSize())
+			{
+				sendError();
+				return;
+			}
+			if (availableBytes >= needBytes)
+			{
+				
+				p.size = needBytes;
+				for (byte_t i = 0; i < needBytes; ++i)
+				{
+					tailRx_ = (tailRx_ + 1) & BUFFER_MASK;
+					p.data[i] = bufferRx_ [tailRx_];
+				}
+			}
+		}
+		else
+		{
+			sendError();
+		}		
+	}
 }

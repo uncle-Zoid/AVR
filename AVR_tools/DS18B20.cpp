@@ -51,11 +51,13 @@ void DS18B20::readScratchpad()
 	else
 	{
 		power_ = noSensor;
+		memset(scratchpad_, 0, SCRATCHPAD_SIZE);
 	}
 }
 
 void DS18B20::readRom()
 {
+	memset(rom_, 0, ROM_SIZE);
 	owi_.readROM(rom_, ROM_SIZE);
 }
 
@@ -94,6 +96,8 @@ void DS18B20::writeConfigRegister(const byte_t (&config)[3], bool writeToEEPROM)
 
 int DS18B20::temperature()
 {
+	readScratchpad();
+	
 	int sign = 1; // kladne znamenko
 	int t = (scratchpad_[TEMPERATURE_MSB] << 8) | scratchpad_[TEMPERATURE_LSB];
 	// je teplota zaporna?
