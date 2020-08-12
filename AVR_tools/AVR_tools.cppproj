@@ -172,6 +172,12 @@
     <CleanTarget>clean</CleanTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Communicator.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Communicator.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="crc.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -182,6 +188,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="DalasCrc.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="defines.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="DS18B20.cpp">

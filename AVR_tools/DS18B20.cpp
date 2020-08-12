@@ -77,7 +77,7 @@ void DS18B20::readPowerSupply()
 	}
 }
 
-void DS18B20::writeConfigRegister(const byte_t (&config)[3], bool writeToEEPROM)
+void DS18B20::writeConfigRegister(const byte_t *config)
 {
 	if (owi_.reset())
 	{
@@ -87,7 +87,8 @@ void DS18B20::writeConfigRegister(const byte_t (&config)[3], bool writeToEEPROM)
 		{
 			owi_.writeByte(config[i]);
 		}
-		if (writeToEEPROM)
+		
+		if (config[3]) //writeToEEPROM
 		{
 			owi_.writeByte(COPY);
 		}

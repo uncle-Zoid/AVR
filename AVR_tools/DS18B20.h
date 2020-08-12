@@ -49,6 +49,7 @@ public:
 		ExternalSupply		
 		};
 	static constexpr uint32_t CONVERSION_WAIT_US[4] = {750000, 375000, 187500, 93750};
+	static constexpr uint16_t CONVERSION_WAIT_MS[4] = {750, 375, 188, 94};
 	static constexpr byte_t SCRATCHPAD_SIZE = 9; 
 	static constexpr byte_t ROM_SIZE = 8;
 	
@@ -87,12 +88,27 @@ public:
 	void readPowerSupply ();
 	
 	/**
-	* zapise do konfiruracniho registru (TL, TH, rozliseni)
+	* zapise do konfiruracniho registru (TL, TH, rozliseni, writeToEEPROM)
 	*/
-	void writeConfigRegister (const byte_t (&config)[3], bool writeToEEPROM);
+	void writeConfigRegister (const byte_t *config);
 	
 	// teplota je ulozena s presnosti na dve desetinna mista 2550 = 25,5 °C
 	int temperature();
+	
+	/**
+	* vraci pocet milisekund, ktere je treba aspon pockat, pred ctenim teploty
+	*/
+	uint16_t waitTime() const
+	{
+		switch (scratchpad_[ConfigRegister])
+		{
+			case RESOLUTION_12B: return CONVERSION_WAIT_MS[0];
+			case RESOLUTION_11B: return CONVERSION_WAIT_MS[1];
+			case RESOLUTION_10B: return CONVERSION_WAIT_MS[2];
+			case RESOLUTION_09B: return CONVERSION_WAIT_MS[3];
+		}
+		return 0;
+	}
 	
 	
 	byte_t*		scratchpad	()  { return scratchpad_; }

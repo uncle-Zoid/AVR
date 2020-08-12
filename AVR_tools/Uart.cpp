@@ -9,7 +9,6 @@
 
 #include "Uart.h"
 
-const byte_t Uart::SERIAL_ERROR[3] = {HEAD, 3, 0xFE};
 	
 ISR (USART_RXC_vect)
 {
@@ -106,25 +105,12 @@ void Uart::send(byte_t data)
 	UCSRB |= (1 << UDRIE);
 }
 
-void Uart::send (const Packet &p)
-{
-	send (p.data, p.size);
-}
-
-
 void Uart::send(const byte_t *data, int size)
 {
 	for (int i = 0; i < size; ++i)
 	{
 		send(data[i]);
 	}
-}
-
-void Uart::sendError()
-{
-	headRx_ = 0;
-	tailRx_ = 0;
-	send(SERIAL_ERROR, sizeof (SERIAL_ERROR));
 }
 
 byte_t Uart::read(UartError &err)
@@ -139,35 +125,3 @@ byte_t Uart::read(UartError &err)
 	return bufferRx_ [tailRx_];
 }
 
-void Uart::read(Packet &p)
-{
-	// pridat overovani casu
-	p.size = -1;
-	byte_t availableBytes = available();
-	if (availableBytes >= 3)
-	{
-		if (bufferRx_[(tailRx_ + 1) & BUFFER_MASK] == HEAD)
-		{			
-			byte_t needBytes = bufferRx_[(tailRx_ + 2) & BUFFER_MASK];
-			if (needBytes > p.maxSize())
-			{
-				sendError();
-				return;
-			}
-			if (availableBytes >= needBytes)
-			{
-				
-				p.size = needBytes;
-				for (byte_t i = 0; i < needBytes; ++i)
-				{
-					tailRx_ = (tailRx_ + 1) & BUFFER_MASK;
-					p.data[i] = bufferRx_ [tailRx_];
-				}
-			}
-		}
-		else
-		{
-			sendError();
-		}		
-	}
-}
