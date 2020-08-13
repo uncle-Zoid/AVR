@@ -172,6 +172,9 @@
     <CleanTarget>clean</CleanTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="avrport.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Communicator.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -206,6 +209,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Owi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="SevenSeg.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="SevenSeg.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Uart.cpp">

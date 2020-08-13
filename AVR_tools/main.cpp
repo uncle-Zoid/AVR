@@ -16,14 +16,15 @@
 #include "Uart.h"
 #include "DalasCrc.h"
 #include "Communicator.h"
+#include "SevenSeg.h"
 
-volatile int delayCounter;
 volatile int timer = 0;
+volatile int seventimer = 0;
 
 ISR (TIMER0_OVF_vect)
 {
-	--delayCounter;
-	timer ++;
+	++ timer;
+	++ seventimer;
 }
 
 enum {
@@ -43,19 +44,26 @@ int main(void)
 	TCCR0 = (1 << CS00) | (1 << CS01);
 	TIMSK |= (1 << TOIE0);
 	
-	delayCounter = 1000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
+	
 
 
 	Communicator com(9600);
 
 		
-	AvrPort owiPort{&DDRC, &PINC, &PORTC};		
+	AvrPort owiPort{&DDRC, &PINC, &PORTC};
 	DS18B20 sensor(owiPort, 0);
 	
+	
+	AvrPort sevenDataPort   {&DDRA, &PINA, &PORTA};
+	AvrPort sevenComamndPort{&DDRB, &PINB, &PORTB};
+	SevenSeg sevenseg(sevenDataPort, sevenComamndPort, 4, 2);
+	
+		
 	Packet pck;
-	int automaticMeassureDelay = 1000;
+	int automaticMeassureDelay = 1000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
 	byte_t automaticMeassure = NO_MEASSURE;
 	uint16_t conversionWait = 0;
+	
 	sei();
 	
     while (1) 
@@ -66,9 +74,9 @@ int main(void)
 			if (timer > automaticMeassureDelay)
 			{
 				timer = 0;
-				PORTA ^= 0xFF;
-				
-				com.send(sensor.temperature(), Commands::SEND_TEMPERATURE);
+				auto t = sensor.temperature();
+				com.send(t, Commands::SEND_TEMPERATURE);
+				sevenseg.showValue(t);
 				sensor.startConversion();
 			}	
 			break;
@@ -76,9 +84,10 @@ int main(void)
 		case SINGLE_SHOT:
 			if (timer > conversionWait)
 			{
-				PORTA ^= 0xFF;
+				auto t = sensor.temperature();
+				sevenseg.showValue(t);				
+				com.send(t, Commands::SEND_TEMPERATURE);
 				automaticMeassure = NO_MEASSURE;
-				com.send(sensor.temperature(), Commands::SEND_TEMPERATURE);
 			}
 			break;
 		}
@@ -126,6 +135,11 @@ int main(void)
 					sensor.writeConfigRegister(pck.data + Communicator::OFFSET_DATA);					
 					break;
 			}
+		}
+		if (seventimer > 1)
+		{
+			seventimer = 0;
+			sevenseg.display();
 		}	
     }
 }

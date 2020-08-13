@@ -8,28 +8,12 @@
 #ifndef __OWI_H__
 #define __OWI_H__
 
-#ifndef F_PCU
-#define F_CPU 16000000UL
+
+#include "defines.h"
+
+#ifndef F_CPU
+#error "F_PCU not defined"
 #endif
-
-
-
-#define resbit(port, bit)  (port &= ~(1<<bit));
-#define setbit(port, bit)  (port |= (1<<bit));
-#define testbit(port, bit) (port & (1<<bit))
-
-
-
-#include <inttypes.h>
-
-using byte_t = uint8_t;
-
-struct AvrPort
-{
-	volatile uint8_t *ddr;
-	volatile uint8_t *pin;
-	volatile uint8_t *port;
-};
 
 class Owi
 {
