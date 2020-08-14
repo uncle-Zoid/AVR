@@ -31,6 +31,7 @@ private:
 	
 	byte_t nums_[4];
 	byte_t buffer[4];
+	byte_t isChanged_;
 }; //SevenSeg
 
 #endif //__SEVENSEG_H__

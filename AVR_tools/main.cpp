@@ -19,12 +19,14 @@
 #include "SevenSeg.h"
 
 volatile int timer = 0;
-volatile int seventimer = 0;
+
+static SevenSeg *psevenseg = nullptr;
 
 ISR (TIMER0_OVF_vect)
 {
 	++ timer;
-	++ seventimer;
+	
+	psevenseg->display();
 }
 
 enum {
@@ -57,7 +59,7 @@ int main(void)
 	AvrPort sevenDataPort   {&DDRA, &PINA, &PORTA};
 	AvrPort sevenComamndPort{&DDRB, &PINB, &PORTB};
 	SevenSeg sevenseg(sevenDataPort, sevenComamndPort, 4, 2);
-	
+	psevenseg = &sevenseg;
 		
 	Packet pck;
 	int automaticMeassureDelay = 1000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
@@ -115,6 +117,7 @@ int main(void)
 					
 				case Commands::SEND_TEMPERATURE:
 					sensor.readScratchpad();
+					sensor.startConversion();
 					automaticMeassure = SINGLE_SHOT;
 					conversionWait = sensor.waitTime();
 					restartTimer0();
@@ -122,6 +125,7 @@ int main(void)
 					
 				case Commands::SET_AUTOMATIC_MEASURE:
 					automaticMeassure = AUTOMATIC_MEASSURE;
+					sensor.startConversion();
 					restartTimer0();					
 					break;
 					
@@ -135,11 +139,6 @@ int main(void)
 					sensor.writeConfigRegister(pck.data + Communicator::OFFSET_DATA);					
 					break;
 			}
-		}
-		if (seventimer > 1)
-		{
-			seventimer = 0;
-			sevenseg.display();
 		}	
     }
 }
