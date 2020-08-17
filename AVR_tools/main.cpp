@@ -62,8 +62,8 @@ int main(void)
 	psevenseg = &sevenseg;
 		
 	Packet pck;
-	int automaticMeassureDelay = 1000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
-	byte_t automaticMeassure = NO_MEASSURE;
+	int automaticMeassureDelay = 10000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
+	byte_t automaticMeassure = AUTOMATIC_MEASSURE;
 	uint16_t conversionWait = 0;
 	
 	sei();
@@ -101,7 +101,7 @@ int main(void)
 			switch (Commands(pck.data[Communicator::OFFSET_COMMAND]))
 			{
 				case Commands::SEND_POWER_MODE:
-					sensor.readRom();
+					sensor.readPowerSupply();
 					com.send(sensor.power(), Commands::SEND_POWER_MODE);
 					break;
 					
@@ -119,7 +119,7 @@ int main(void)
 					sensor.readScratchpad();
 					sensor.startConversion();
 					automaticMeassure = SINGLE_SHOT;
-					conversionWait = sensor.waitTime();
+					conversionWait = 1000; //dam pevnou dobu cekani //sensor.waitTime();
 					restartTimer0();
 					break;
 					
@@ -131,6 +131,10 @@ int main(void)
 					
 				case Commands::SET_MEASURE_PERIOD:
 					automaticMeassureDelay = (pck.data[Communicator::OFFSET_DATA] << 8) | pck.data[Communicator::OFFSET_DATA + 1];
+					if (automaticMeassureDelay < 1000)
+					{
+						automaticMeassureDelay = 1000;						
+					}
 					com.send(automaticMeassureDelay, Commands::SET_MEASURE_PERIOD);
 					restartTimer0();
 					break;
