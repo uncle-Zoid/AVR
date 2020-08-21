@@ -54,7 +54,7 @@ int main(void)
 		
 	AvrPort owiPort{&DDRC, &PINC, &PORTC};
 	DS18B20 sensor(owiPort, 0);
-	
+	sensor.startConversion();
 	
 	AvrPort sevenDataPort   {&DDRA, &PINA, &PORTA};
 	AvrPort sevenComamndPort{&DDRB, &PINB, &PORTB};
