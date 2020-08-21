@@ -62,7 +62,7 @@ int main(void)
 	psevenseg = &sevenseg;
 		
 	Packet pck;
-	int automaticMeassureDelay = 10000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
+	int automaticMeassureDelay = 2000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
 	byte_t automaticMeassure = AUTOMATIC_MEASSURE;
 	uint16_t conversionWait = 0;
 	
@@ -76,8 +76,11 @@ int main(void)
 			if (timer > automaticMeassureDelay)
 			{
 				timer = 0;
+				
 				auto t = sensor.temperature();
-				com.send(t, Commands::SEND_TEMPERATURE);
+				//com.send(t, Commands::SEND_TEMPERATURE);
+				com.send(sensor.scratchpad(), 9, Commands::SEND_SCRATCHPAD);
+				
 				sevenseg.showValue(t);
 				sensor.startConversion();
 			}	
@@ -88,7 +91,8 @@ int main(void)
 			{
 				auto t = sensor.temperature();
 				sevenseg.showValue(t);				
-				com.send(t, Commands::SEND_TEMPERATURE);
+				//com.send(t, Commands::SEND_TEMPERATURE);
+				com.send(sensor.scratchpad(), 9, Commands::SEND_SCRATCHPAD);
 				automaticMeassure = NO_MEASSURE;
 			}
 			break;

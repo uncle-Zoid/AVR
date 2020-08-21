@@ -18,7 +18,7 @@ void Communicator::send(byte_t *data, int size, Commands command)
 	uart_.send(size + 3);
 	uart_.send(byte_t(command));
 	
-	for (int i = size - 1; i >= 0; --i)
+	for (int i = 0; i < size; ++i)
 	{
 		uart_.send(data[i]);
 	}
