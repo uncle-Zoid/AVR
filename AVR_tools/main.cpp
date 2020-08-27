@@ -65,11 +65,16 @@ int main(void)
 	int automaticMeassureDelay = 2000; //1000 * (256 * 64) / F_CPU;  // (256 * 64) / F_CPU ~~ 1ms
 	byte_t automaticMeassure = AUTOMATIC_MEASSURE;
 	uint16_t conversionWait = 0;
-	
+	byte_t ready = 0;
 	sei();
 	
     while (1) 
     {
+		if (timer > 1000 && !ready)
+		{
+			ready = 1;
+			com.send(Commands::DEVICE_READY);
+		}
 		switch (automaticMeassure)
 		{
 		case AUTOMATIC_MEASSURE:
@@ -79,7 +84,7 @@ int main(void)
 				
 				auto t = sensor.temperature();
 				//com.send(t, Commands::SEND_TEMPERATURE);
-				com.send(sensor.scratchpad(), 9, Commands::SEND_SCRATCHPAD);
+				com.send(Commands::SEND_SCRATCHPAD, sensor.scratchpad(), DS18B20::SCRATCHPAD_SIZE);
 				
 				sevenseg.showValue(t);
 				sensor.startConversion();
@@ -92,7 +97,7 @@ int main(void)
 				auto t = sensor.temperature();
 				sevenseg.showValue(t);				
 				//com.send(t, Commands::SEND_TEMPERATURE);
-				com.send(sensor.scratchpad(), 9, Commands::SEND_SCRATCHPAD);
+				com.send(Commands::SEND_SCRATCHPAD, sensor.scratchpad(), DS18B20::SCRATCHPAD_SIZE);
 				automaticMeassure = NO_MEASSURE;
 			}
 			break;
@@ -106,17 +111,17 @@ int main(void)
 			{
 				case Commands::SEND_POWER_MODE:
 					sensor.readPowerSupply();
-					com.send(sensor.power(), Commands::SEND_POWER_MODE);
+					com.send(Commands::SEND_POWER_MODE, sensor.power());
 					break;
 					
 				case Commands::SEND_ROM:
 					sensor.readRom();
-					com.send(sensor.rom(), DS18B20::ROM_SIZE, Commands::SEND_ROM);
+					com.send(Commands::SEND_ROM, sensor.rom(), DS18B20::ROM_SIZE);
 					break;
 				
 				case Commands::SEND_SCRATCHPAD:
 					sensor.readScratchpad();
-					com.send(sensor.scratchpad(), DS18B20::SCRATCHPAD_SIZE, Commands::SEND_SCRATCHPAD);
+					com.send(Commands::SEND_SCRATCHPAD, sensor.scratchpad(), DS18B20::SCRATCHPAD_SIZE);
 					break;
 					
 				case Commands::SEND_TEMPERATURE:
@@ -139,12 +144,15 @@ int main(void)
 					{
 						automaticMeassureDelay = 1000;						
 					}
-					com.send(automaticMeassureDelay, Commands::SET_MEASURE_PERIOD);
+					com.send(pck);//Commands::SET_MEASURE_PERIOD, automaticMeassureDelay);
 					restartTimer0();
 					break;
 					
 				case Commands::SET_SENSOR_PARAMS:
 					sensor.writeConfigRegister(pck.data + Communicator::OFFSET_DATA);					
+					break;
+					
+				case Commands::DEVICE_READY:
 					break;
 			}
 		}	

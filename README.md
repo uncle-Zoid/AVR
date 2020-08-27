@@ -18,6 +18,7 @@ Main loop run Thermometer and sends data via UART.
 | SET_AUTOMATIC_MEASURE | 5 | -- | start automatical measure
 | SET_SENSOR_PARAMS | 6 | Th, Tl, config<br>to EEPROM | sets sensor registers
 | SET_MEASURE_PERIOD | 7 | 2 B | time in milliseconds
+| DEVICE_READY | 8 | -- | send after 1 sec if the device is running |
 
 **Scratchpad**
 

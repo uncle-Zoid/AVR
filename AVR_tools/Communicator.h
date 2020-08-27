@@ -25,6 +25,7 @@ enum class Commands{
 	, SET_AUTOMATIC_MEASURE // automaticke mereni teploty start/stop
 	, SET_SENSOR_PARAMS
 	, SET_MEASURE_PERIOD
+	, DEVICE_READY
 };
 
 
@@ -71,13 +72,13 @@ public:
 	
 		
 	template <class T>
-	void send(T data, Commands command)
-	{
+	void send(Commands command, T data)
+	{		
 		byte_t *pdataBegin = reinterpret_cast<byte_t*>(&data);
-		send(pdataBegin, sizeof (T), command);
+		send(command, pdataBegin, sizeof (T));
 	}
 	
-	void send(byte_t *data, int size, Commands command);
+	void send(Commands command, byte_t *data = nullptr, int size = 0);
 	void send(const Packet &pck);
 	
 	void receive(Packet &p);

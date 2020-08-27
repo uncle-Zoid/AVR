@@ -12,7 +12,7 @@ Communicator::Communicator(uint32_t baud) : uart_ (Uart::instance())
 	Uart::instance().init(UART_BAUD_SELECT(baud, F_CPU));
 }
 
-void Communicator::send(byte_t *data, int size, Commands command)
+void Communicator::send(Commands command, byte_t *data, int size)
 {
 	uart_.send(HEAD);
 	uart_.send(size + 3);
